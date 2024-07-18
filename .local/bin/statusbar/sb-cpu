@@ -1,0 +1,51 @@
+#!/bin/sh
+# Credit:
+# https://codereview.stackexchange.com/a/62429
+# https://superuser.com/questions/1776718/getting-average-cpu-frequency
+
+case $BLOCK_BUTTON in
+    1) notify-send " CPU hogs" "$(ps axch -o cmd:15,%cpu --sort=-%cpu | head)\\n(100% per core)" ;;
+    2) setsid -f "$TERMINAL" -e btop ;;
+esac
+
+getstat() {
+    sed -ne '/^cpu  */s/^cpu  *//p' /proc/stat
+    # that is:
+    # -n to not print lines by default
+    # for lines matching /^cpu  */, delete /^cpu  */, and print the line
+}
+
+extract() {
+    # example 1st param: "437797 1219 185341 549955584 58662 4 7083 0 0 0"
+    # example 2nd param: 1, 2, 3, ... (the n-th column to use)
+    n=$2                  # saving the position param
+    set -- $1             # reset positional params from $1, so that $1=437797, $2=1219, ...
+    # echo ${!n}          # echo the n-th positional param (bash)
+    eval "echo \"\$$n\""  # echo the n-th positional param (POSIX-compliant)
+}
+
+change() {
+    e=$(extract "$ENDSTAT" "$1")
+    b=$(extract "$STARTSTAT" "$1")
+    echo $(( e - b ))
+}
+
+# Cache in tmpfs to improve speed and reduce SSD load
+cache=/tmp/cpucache
+
+ENDSTAT=$(getstat)
+[ ! -f $cache ] && echo "$ENDSTAT" > "$cache"
+STARTSTAT=$(cat "$cache")
+
+USR=$(change 1)
+SYS=$(change 3)
+IDLE=$(change 4)
+IOW=$(change 5)
+
+ACTIVE=$(( USR + SYS + IOW ))
+TOTAL=$((ACTIVE + IDLE))
+PCT=$(( ACTIVE * 100 / TOTAL ))
+FREQ=$(grep MHz /proc/cpuinfo | awk '{print $4}' | awk '{freq+=$1;n++} END{printf("%.1f", freq/n/1000);}')
+TEMP=$(sensors | awk '/CPU:/ {print $2}' | grep -o '[0-9,.]\+' | awk '{printf("%i", $1)}')
+echo " $PCT% ${FREQ}GHz $TEMP°C"
+echo "$ENDSTAT" > "$cache"

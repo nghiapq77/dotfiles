@@ -1,0 +1,14 @@
+#!/bin/sh
+# Requires maim. It lets you choose the kind of screenshot to take,
+# including copying the image or highlighting an area to copy
+
+pic_dir="$HOME/pics"
+output="$(date '+%y%m%d-%H%M-%S').png"
+xclip_cmd="xclip -sel clip -t image/png"
+
+case "$(printf "1 - a selected area (clipboard)\\n2 - a selected area\\n3 - full screen (clipboard)\\n4 - full screen" | dmenu -l 4 -i -p "Screenshot which area?")" in
+    "1 - a selected area (clipboard)") maim -u -s | ${xclip_cmd} ;;
+    "2 - a selected area") maim -u -s "$pic_dir"/pic-selected-"$output" ;;
+    "3 - full screen (clipboard)") maim -q -d 0.2 | ${xclip_cmd} ;;
+    "4 - full screen") maim -q -d 0.2 "$pic_dir"/pic-full-"$output" ;;
+esac

@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh dwmblocks bar after wake up
+After=suspend.target
+
+[Service]
+User=oz
+ExecStart=/home/oz/.local/bin/statusbar/refbar
+
+[Install]
+WantedBy=suspend.target

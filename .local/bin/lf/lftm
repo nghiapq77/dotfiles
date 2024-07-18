@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Starts lf in tmux session
+session="lf"
+if ! tmux has-session -t $session 2>/dev/null; then
+    window=1
+    tmux new-session -d -s $session
+    tmux send-keys -t $session:$window 'lfub' C-m
+fi
+tmux attach-session -t $session

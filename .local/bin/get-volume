@@ -1,0 +1,23 @@
+#!/bin/sh
+
+split() {
+    # For ommiting the . without calling and external program.
+    IFS=$2
+    set -- $1
+    printf '%s' "$@"
+}
+
+vol="$(wpctl get-volume @DEFAULT_AUDIO_SINK@)"
+vol="${vol#Volume: }"
+
+case "$1" in
+    percent)
+        vol="${vol% \[MUTED\]}"
+        vol="$(printf "%.0f" "$(split "$vol" ".")")%"
+        echo "$vol"
+        ;;
+    *)
+        [ "$vol" != "${vol%\[MUTED\]}" ] && vol="muted" || vol="$(printf "%.0f" "$(split "$vol" ".")")%"
+        echo "$vol"
+        ;;
+esac

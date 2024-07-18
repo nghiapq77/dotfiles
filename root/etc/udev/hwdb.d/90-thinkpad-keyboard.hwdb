@@ -1,0 +1,6 @@
+evdev:atkbd:*
+ KEYBOARD_KEY_3a=leftmeta
+ KEYBOARD_KEY_b8=leftmeta
+
+evdev:name:ThinkPad Extra Buttons:dmi:bvn*:bvr*:bd*:svnLENOVO*:pn*
+ KEYBOARD_KEY_49=prog1

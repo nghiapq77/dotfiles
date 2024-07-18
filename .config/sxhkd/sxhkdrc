@@ -1,0 +1,70 @@
+# sxhkd
+
+super + Return
+    $TERMINAL
+super + d
+    dmenu_run_i
+super + w
+    $BROWSER
+super + o ; {f,t,c,B,m,w,b,n,a}
+    { $TERMINAL -e lftm,\
+      $TERMINAL -e btop,\
+      $TERMINAL -e calcurse,\
+      $TERMINAL -e bluetoothctl,\
+      $TERMINAL -e neomutt,\
+      dmenu_wifi,\
+      dmenu_bluetooth,\
+      dmenu_noti,\
+      pavucontrol,\
+    }
+super + space ; {f,t,c,B,m,w,b,n,a}
+    { $TERMINAL -e lftm,\
+      $TERMINAL -e btop,\
+      $TERMINAL -e calcurse,\
+      $TERMINAL -e bluetoothctl,\
+      $TERMINAL -e neomutt,\
+      dmenu_wifi,\
+      dmenu_bluetooth,\
+      dmenu_noti,\
+      pavucontrol,\
+    }
+super + shift + r
+    pkill -USR1 -x sxhkd; notify-send -u low -t 1000 "sxhkd" "Reloaded config"
+super + r
+    refbar; notify-send -u low -t 1000 "dwmblocks" "Refreshed"
+super + e
+    toggle_lang; pkill -39 dwmblocks
+super + b
+    dmenu_bluetooth
+super + n
+    toggle_redshift
+super + p
+    dmenu_passmenu
+super + equal
+    dmenu_calc
+ctrl + {_,shift + }{space}
+    dunstctl {close,close-all}
+{_,super,shift} + Print
+    {dmenu_maimpick,maim -s | xclip -selection clipboard -t image/png,maim $HOME/pics/pic-full-$(date '+%y%m%d-%H%M-%S').png}
+XF86AudioMute
+    wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; pkill -38 dwmblocks && notify-send -u low -t 1000 -h int:value:$(get-volume percent) "Audio: $(get-volume)"
+{_,super + }XF86Audio{Raise,Lower}Volume
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ {5%+,25%+,5%-,25%-} -l 1.5; pkill -38 dwmblocks && notify-send -u low -t 1000 -h int:value:$(get-volume percent) "Audio: $(get-volume)"
+XF86AudioMicMute
+    playerctl play-pause
+{_,super + }XF86MonBrightness{Up,Down}
+    xbacklight -{inc 10,inc 25,dec 10,dec 25} && notify-send -u low -t 1000 -h int:value:$(xbacklight -get) "Brightness: $(xbacklight -get)%"
+XF86Display
+    toggle_hdmi
+XF86WLAN
+    [ "$(cat /sys/class/net/w*/operstate 2>/dev/null)" = 'up' ] && notify-send "WLAN" "Off" || notify-send "WLAN" "On"; sleep 2.5s && pkill -44 dwmblocks
+XF86Tools
+    toggle_touchpad
+XF86Bluetooth
+    notify-send "Bluetooth" "$(bluetoothctl list | grep -q Controller && echo 'Off' || echo 'On')"; sleep 2.5s && pkill -43 dwmblocks
+XF86Launch1
+    toggle_lang; pkill -39 dwmblocks
+{_,super + }XF86Favorites
+    {xdotool key Super_L+Shift_L+Return,dmenu_battery}
+Insert
+    xdotool type $(grep -v '^#' ~/.local/share/bm | dmenu -p "Bookmarks:" -i -l 20 | cut -d' ' -f1)

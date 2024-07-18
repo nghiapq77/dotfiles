@@ -1,0 +1,46 @@
+#!/bin/sh
+
+case $BLOCK_BUTTON in
+    1) notify-send "Battery" "$(acpi -b)";;
+    2) pkill -37 dwmblocks;;
+    3) notify-send "Battery" "$(acpi -i)";;
+esac
+
+PCT=0
+IS_CHARGING=0
+output=""
+
+# Loop through all attached batteries.
+for battery in /sys/class/power_supply/BAT?*; do
+    # Get battery status and set icon
+    status="$(cat "$battery/status")"
+    case $status in
+        "Full") icon="" ;;
+        "Discharging") icon="" ;;
+        "Charging") icon="" ;;
+        "Not charging") icon="" ;;
+        "Unknown") icon="♻️" ;;
+    esac
+
+    # Get battery capacity
+    capacity=$(cat "$battery/capacity")
+
+    # Make low battery icon if discharging and low
+    [ "$capacity" -le 50 ] && [ "$status" != "Charging" ] && icon=""
+    [ "$capacity" -le 25 ] && [ "$status" != "Charging" ] && icon=""
+
+    # Concatenate batteries' info
+    output="${output}$icon $capacity% "
+
+    # Calculate total battery percentage
+    PCT=`expr $PCT + $capacity`
+
+    # Set charging status
+    [ "$status" = "Charging" ] && IS_CHARGING=1
+done
+
+# Send notify if total battery percentage < 20
+[ "$IS_CHARGING" != 1 ] && [ "$PCT" -le 20 ] && notify-send -u critical "!!! LOW BATTERY !!!"
+
+# Output battery info, trim leading and trailing white spaces
+echo "$output" | awk '{$1=$1};1'

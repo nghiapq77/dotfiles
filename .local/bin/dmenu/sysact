@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# A dmenu wrapper script for system functions.
+
+cmds="\
+ display off : xset dpms force off
+ lock        : slock
+ leave       : kill -TERM $(pidof -s dwm)
+ refresh     : kill -HUP $(pidof -s dwm)
+ reboot      : systemctl reboot -i
+ suspend     : systemctl suspend -i
+ poweroff    : systemctl poweroff -i"
+
+choice="$(echo "$cmds" | cut -d ':' -f 1 | dmenu -l 7 -p 'System action:')" || exit
+eval "$(echo "$cmds" | grep "^$choice" | cut -d ':' -f2)"

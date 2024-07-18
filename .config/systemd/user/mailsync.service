@@ -1,0 +1,13 @@
+[Unit]
+Description=mailsync service
+Documentation=man:mbsync(1) man:mw(2) https://github.com/lukesmithxyz/mutt-wizard
+RequiresMountsFor=%h/.local/share/mail %E/mutt
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=mailsync
+StandardOutput=journal
+StandardError=inherit
+Nice=18
+IOSchedulingClass=idle

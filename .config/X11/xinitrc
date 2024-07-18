@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Remap key, run hotkey daemon
+remaps &
+sxhkd &
+
+# Status bar
+dwmblocks &
+
+# Wallpaper
+xwallpaper --zoom $HOME/.local/dotfiles/wallpaper.png &
+
+# ibus
+ibus-daemon -drx
+
+# compositor
+picom &
+
+# unclutter
+unclutter &
+
+# Use xresources
+xrdb $HOME/.config/X11/xresources &
+
+# Activate dbus variables
+dbus-update-activation-environment --all
+
+# Run dwm
+exec dbus-launch --exit-with-session dwm

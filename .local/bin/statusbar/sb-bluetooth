@@ -1,0 +1,23 @@
+#!/bin/sh
+
+case $BLOCK_BUTTON in
+    2) setsid "$TERMINAL" -e bluetoothctl & ;;
+    3) dmenu_bluetooth ;;
+esac
+
+icon=""
+status=" "
+if echo 'list' | bluetoothctl | grep -q Controller; then
+    # Bluetooth is on
+    info="$(echo 'info' | bluetoothctl)"
+    status="$(echo "$info" | awk '/Alias:/ {$1=""; print}')"
+    if [ -z "$status" ]; then
+        # No device connected
+        status=" "
+    else
+        # Get battery percentage if exists
+        battery="$(echo "$info" | awk '/Battery/ {printf $4}' | cut -d "(" -f2 | cut -d ")" -f1)"
+        [ -n "$battery" ] && status="$status $battery%"
+    fi
+fi
+echo "$icon$status"

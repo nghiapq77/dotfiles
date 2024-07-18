@@ -1,0 +1,9 @@
+#!/bin/sh
+
+case $BLOCK_BUTTON in
+    1) notify-send "$(cal -m)";;
+    2) setsid "$TERMINAL" -e calcurse & ;;
+    3) notify-send "$(cal -m "$(date --date="$(date +%Y-%m-15) +1 month" +'%B')")";;
+esac
+
+echo " $(LC_ALL=C date "+%b %d  %H:%M")"

@@ -1,0 +1,89 @@
+#!/bin/sh
+
+BATTERY_PREFIX="/sys/class/power_supply"
+BATTERY=""
+battery=""
+output=""
+
+get_battery(){
+    for battery in "$BATTERY_PREFIX"/BAT*; do
+        BATTERY="${BATTERY}$(printf "%s" "$battery" | tail -c 1) "
+    done
+    # trim leading and trailing white spaces
+    BATTERY="$(echo "$BATTERY" | awk '{$1=$1};1')"
+}
+
+ask_battery(){
+    battery="$(echo "$BATTERY" | sed 's/ /\n/g' | dmenu -p 'Battery number:')" || exit
+}
+
+notify(){
+    notify-send "Battery" "$1"
+}
+
+notify_battery_charge_threshold(){
+    for battery in $BATTERY; do
+        start=$(cat "$BATTERY_PREFIX/BAT$battery/charge_control_start_threshold")
+        end=$(cat "$BATTERY_PREFIX/BAT$battery/charge_control_end_threshold")
+        output="${output}Battery $(printf "%s" "$battery" | tail -c 1): Threshold $start-$end\n"
+    done
+    notify "$output"
+}
+
+is_integer(){
+    # Source: https://unix.stackexchange.com/questions/598036/how-to-check-if-variable-is-integer-avoid-problem-with-spaces-around-in-posix
+    case "$1" in
+        (*[!0123456789]*) return 1 ;;
+        ('')              return 1 ;;
+        (*)               return 0 ;;
+    esac
+}
+
+get_battery
+cmds="\
+ Information            :info
+ Get current threshold  :get
+ Set threshold          :set
+ full-charge            :full-charge
+ custom-charge          :custom-charge
+ toggle-force-discharge :toggle-force-discharge"
+choice="$(echo "$cmds" | cut -d ':' -f 1 | dmenu -i -l 6 -p 'Battery action:')" || exit
+choice="$(echo "$cmds" | grep "^$choice" | cut -d ':' -f2)"
+case "$choice" in
+    "info")
+        notify "$(acpi -i)"
+        ;;
+    "get")
+        notify_battery_charge_threshold
+        ;;
+    "set")
+        ask_battery
+        start="$(dmenu -p 'Start threshold:')" || exit
+        end="$(dmenu -p 'End threshold:')" || exit
+        # Input checking
+        is_integer "$end" && is_integer "$start" && 
+        [ "$end" -ge 0 ] && [ "$start" -ge 0 ] && [ "$end" -le 100 ] && [ "$start" -le 100 ] && [ "$start" -lt "$end" ] && (
+            echo "$end" | sudo tee "$BATTERY_PREFIX/BAT$battery/charge_control_end_threshold" >/dev/null
+            echo "$start" | sudo tee "$BATTERY_PREFIX/BAT$battery/charge_control_start_threshold" >/dev/null
+            notify_battery_charge_threshold
+        ) || notify "Setting thresholds failed"
+        ;;
+    "full-charge")
+        echo 0 | sudo tee $BATTERY_PREFIX/BAT*/charge_control_start_threshold >/dev/null
+        echo 100 | sudo tee $BATTERY_PREFIX/BAT*/charge_control_end_threshold >/dev/null
+        notify_battery_charge_threshold
+        ;;
+    "custom-charge")
+        echo 80 | sudo tee $BATTERY_PREFIX/BAT*/charge_control_start_threshold >/dev/null
+        echo 81 | sudo tee $BATTERY_PREFIX/BAT*/charge_control_end_threshold >/dev/null
+        notify_battery_charge_threshold
+        ;;
+    "toggle-force-discharge")
+        ask_battery
+        status="$(cat "$BATTERY_PREFIX/BAT$battery/charge_behaviour")"
+        status="$(echo "$status" | cut -d "[" -f2 | cut -d "]" -f1)"
+        [ "$status" = "auto" ] && status="force-discharge" || status="auto"
+        echo "$status" | sudo tee "$BATTERY_PREFIX/BAT$battery/charge_behaviour"
+        notify "Battery $battery charge behaviour changed to: $status"
+        ;;
+esac

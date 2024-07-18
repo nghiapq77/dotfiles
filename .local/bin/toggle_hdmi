@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Set HDMI to left of main screen if available
+hdmi_name="HDMI-1"
+hdmi_disp=$(xrandr -q | grep "$hdmi_name")
+disconnected=$(echo "$hdmi_disp" | awk '/ connected/ {print $1}')
+if [ "$disconnected" = "" ]; then
+    notify-send "Display" "No HDMI connected"
+else
+    xrandr --output "$hdmi_name" --auto --left-of eDP-1 && notify-send "Display" "HDMI left of main screen"
+fi
+
+# set wallpaper
+xwallpaper --zoom ~/.local/config/wall.png

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+pkill -36 dwmblocks   # time
+pkill -37 dwmblocks   # battery
+pkill -38 dwmblocks   # sound
+pkill -43 dwmblocks   # bluetooth
+pkill -44 dwmblocks   # internet

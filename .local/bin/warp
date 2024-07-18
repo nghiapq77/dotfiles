@@ -1,0 +1,18 @@
+#!/bin/sh
+
+case "$1" in
+    up)
+        sudo systemctl start warp-svc.service && sleep 0.8 && warp-cli connect
+        echo "Cloudflare WARP up";;
+    down)
+        warp-cli disconnect && sudo systemctl stop warp-svc.service
+        echo "Cloudflare WARP down";;
+    status | s)
+        warp-cli status;;
+    connect | c)
+        warp-cli connect;;
+    disconnect | d)
+        warp-cli disconnect;;
+    *)
+        echo "Argument $1 not supported";;
+esac

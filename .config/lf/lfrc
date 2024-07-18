@@ -1,0 +1,164 @@
+# Note on Image Previews
+#
+# 1. ueberzug must be installed.
+# 2. The preview file (~/.local/bin/lf/lf-previewer for me), must have a command similar to
+#    mine to generate ueberzug images.
+# 3. A `set cleaner` line as below is a cleaner script.
+# 4. lf should be started through a wrapper script (~/.local/bin/lfub for me)
+#    that creates the environment for ueberzug. This command can be be aliased
+#    in your shellrc (`alias lf="lfub") or if set to a binding, should be
+#    called directly instead of normal lf.
+
+# Basic vars
+set shellopts '-eu'
+set ifs "\n"
+set scrolloff 10
+set icons
+set period 1
+set cleaner '~/.local/bin/lf/lf-cleaner'
+set previewer '~/.local/bin/lf/lf-previewer'
+set info size
+set dircounts
+set drawbox
+set mouse
+
+# cmds/functions
+cmd open ${{
+    case $(file --mime-type "$(readlink -f $f)" -b) in
+        text/* | application/json | inode/x-empty | application/x-subrip) $EDITOR $fx;;
+        image/svg+xml) display -- $f ;;
+        image/*) rotdir $f | grep -i "\.\(png\|jpg\|jpeg\|gif\|webp\|tif\|ico\)\(_large\)*$" |
+            setsid -f nsxiv -aio 2>/dev/null | while read -r file; do
+                [ -z "$file" ] && continue
+                lf -remote "send select \"$file\""
+                lf -remote "send toggle"
+            done &
+            ;;
+        audio/*) mpv --audio-display=no $f ;;
+        video/*) setsid -f mpv $f -quiet >/dev/null 2>&1 ;;
+        application/pdf) setsid -f zathura $fx >/dev/null 2>&1 ;;
+        application/*zip) aunpack $fx ;;
+        *) for f in $fx; do setsid -f $OPENER $f >/dev/null 2>&1; done;;
+    esac
+}}
+
+cmd paste &{{
+    set -- $(cat ~/.local/share/lf/files)
+    mode="$1"
+    shift
+    case "$mode" in
+        copy)
+            rsync -av --ignore-existing --progress -- "$@" . |
+            stdbuf -i0 -o0 -e0 tr '\r' '\n' |
+            while IFS= read -r line; do
+                lf -remote "send $id echo $line"
+            done
+            ;;
+        move) mv -n -- "$@" .;;
+    esac
+    rm ~/.local/share/lf/files
+    lf -remote "send clear"
+    notify-send "$@"
+    notify-send "File(s) pasted"
+}}
+
+cmd delete ${{
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    printf "%s\n\t" "$fx"
+    printf "delete?[y/N]"
+    read ans
+    [ $ans = "y" ] && rm -rf -- $fx
+    notify-send "File(s) deleted"
+}}
+
+cmd extract ${{
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    printf "%s\n\t" "$fx"
+    printf "extract?[y/N]"
+    read ans
+    [ $ans = "y" ] && aunpack $fx
+}}
+
+cmd tar %tar czf "$(basename "$f").tar.gz" "$(basename $f)"
+
+cmd zip %zip -r "$(basename "$f").zip" "$(basename $f)"
+
+cmd copyto ${{
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    clear; echo "Copy to where?"
+    dest="$(find ~ | fzf)" &&
+    for x in $fx; do
+        eval cp -ivr \"$x\" \"$dest\"
+    done &&
+    notify-send "📋 File(s) copied to $dest."
+}}
+
+cmd moveto ${{
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    clear; echo "Move to where?"
+    dest="$(find ~ | fzf)" &&
+    for x in $fx; do
+        eval mv -iv \"$x\" \"$dest\"
+    done &&
+    notify-send "🚚 File(s) moved to $dest."
+}}
+
+cmd bulkrename ${{
+    tmpfile_old="$(mktemp)"
+    tmpfile_new="$(mktemp)"
+
+    [ -n "$fs" ] && fs=$(basename -a $fs) || fs=$(ls)
+
+    echo "$fs" > "$tmpfile_old"
+    echo "$fs" > "$tmpfile_new"
+    $EDITOR "$tmpfile_new"
+
+    [ "$(wc -l < "$tmpfile_old")" -eq "$(wc -l < "$tmpfile_new")" ] || { rm -f "$tmpfile_old" "$tmpfile_new"; exit 1; }
+
+    paste "$tmpfile_old" "$tmpfile_new" | while IFS="$(printf '\t')" read -r src dst
+    do
+        [ "$src" = "$dst" ] || [ -e "$dst" ] || mv -- "$src" "$dst"
+    done
+
+    rm -f "$tmpfile_old" "$tmpfile_new"
+    lf -remote "send $id unselect"
+}}
+
+# https://github.com/gokcehan/lf/wiki/Tips#yank-paths-into-your-clipboard
+cmd yank-basename $basename -a -- $fx | head -c-1 | xclip -i -selection clipboard
+
+# Key bindings
+map <c-f> $lf -remote "send $id select \"$(fzf)\""
+map <c-n> push :mkdir<space>
+map <c-r> reload
+map <enter> shell
+
+map q
+map Q quit
+map ` mark-load
+map J half-down
+map K half-up
+map o open
+map g top
+map y copy
+map D delete
+map X extract
+map Z zip
+map T tar
+map S $$SHELL
+map Y yank-basename
+map C copyto
+map M moveto
+
+# rename
+map A rename # at the very end
+map i push A<c-a> # at the very beginning
+map a push A<a-b><a-b><a-f> # before extension
+map B bulkrename
+
+# tmux
+map <a-w> $tmux new-window; tmux send-keys "lfub" C-m

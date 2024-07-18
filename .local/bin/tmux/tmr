@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Attach if exists
+session="oz"
+if $(tmux has-session -t $session 2>/dev/null); then tmux -2u att $session; exit; fi
+
+# Window 1
+tmux new-session -d -n bash -s $session -c /home/oz
+sleep 0.05
+tmux send-keys -t $session:1.1 "sudo openvpn /home/oz/projects/clv/10.ovpn" Enter
+sleep 0.05
+tmux send-keys -t $session:1.1 "nghia.pham" Enter
+sleep 0.05
+tmux send-keys -t $session:1.1 "$(pass cyber-openvpn)" Enter
+tmux split-window -t $session:1 -c /home/oz
+sleep 0.05
+tmux rename-window vpn
+sleep 0.2
+
+# Window 2
+tmux new-window -n bash -t $session:2 -c /home/oz
+sleep 0.05
+tmux send-keys -t $session:2.1 "ssh c" Enter
+sleep 0.1
+tmux send-keys -t $session:2.1 "tmux a" Enter
+tmux rename-window cyber70
+
+# Window 4
+tmux new-window -n bash -t $session:3 -c /home/oz
+
+# Attaching
+tmux -2u att

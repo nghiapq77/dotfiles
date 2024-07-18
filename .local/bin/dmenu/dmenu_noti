@@ -1,0 +1,8 @@
+#!/bin/sh
+
+prompt="Add a task: "
+task=$(dmenu -p "$prompt" </dev/null)
+prompt="Send notification in (minute): "
+time=$(dmenu -p "$prompt" </dev/null)
+check=`echo "$time" | grep -E ^\-?[0-9]*\.?[0-9]+$`
+[ "$check" != '' ] && notify-send "Reminding '$task' in ${time}m" && sleep "$time"m && notify-send -u critical "$task" || notify-send "dmenu_noti" "Failed"

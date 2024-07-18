@@ -1,0 +1,11 @@
+[Unit]
+Description=mailsync timer
+Documentation=man:mbsync(1) man:mw(1) https://github.com/lukesmithxyz/mutt-wizard
+
+[Timer]
+OnActiveSec=0s
+OnUnitActiveSec=3m
+AccuracySec=1m
+
+[Install]
+WantedBy=timers.target
