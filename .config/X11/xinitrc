@@ -1,26 +1,27 @@
 #!/bin/sh
 
-# Remap key, run hotkey daemon
-remaps &
-sxhkd &
+# Do not background the xrdb command within xinitrc
+#xrdb $HOME/.config/X11/xresources
 
-# Status bar
-dwmblocks &
-
-# Wallpaper
-xwallpaper --zoom $HOME/.local/dotfiles/wallpaper.png &
-
-# ibus
+# Define autostart commands
+AUTOSTART="\
+dwmblocks
+remaps
+sxhkd
 ibus-daemon -drx
+picom
+unclutter
+xwallpaper --zoom $HOME/.local/dotfiles/wallpaper.png
+"
 
-# compositor
-picom &
+IFS="
+" # split on newline
 
-# unclutter
-unclutter &
-
-# Use xresources
-xrdb $HOME/.config/X11/xresources &
+# Run autostart commands
+for command in $AUTOSTART; do
+    program="$(echo "$command" | cut -d" " -f1)"
+    pidof -sx "$program" || eval "$command &"
+done >/dev/null 2>&1
 
 # Activate dbus variables
 dbus-update-activation-environment --all
