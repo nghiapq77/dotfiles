@@ -48,13 +48,14 @@ alias mv="mv -iv"
 alias rm="rm -vI"
 alias rsync="rsync -Prv"
 alias i="ip -br -c a"
+alias j="cd"
 
 ### fzf
 # Source auto-completion and key bindings
 [[ $- == *i* ]] && source "/usr/share/fzf/completion.bash" 2> /dev/null; source "/usr/share/fzf/key-bindings.bash"
 
-### Autojump
-[[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
+### zoxide
+eval "$(zoxide init --cmd cd bash)"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -70,4 +71,3 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-

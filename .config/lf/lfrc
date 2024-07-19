@@ -131,8 +131,23 @@ cmd bulkrename ${{
 # https://github.com/gokcehan/lf/wiki/Tips#yank-paths-into-your-clipboard
 cmd yank-basename $basename -a -- $fx | head -c-1 | xclip -i -selection clipboard
 
+# zoxide
+cmd z %{{
+    result="$(zoxide query --exclude $PWD "$@")"
+    lf -remote "send $id cd '$result'"
+}}
+
+cmd zi ${{
+    result="$(zoxide query -i)"
+    lf -remote "send $id cd '$result'"
+}}
+
+cmd on-cd &{{
+    zoxide add "$PWD"
+}}
+
 # Key bindings
-map <c-f> $lf -remote "send $id select \"$(fzf)\""
+map <c-f> zi
 map <c-n> push :mkdir<space>
 map <c-r> reload
 map <enter> shell
@@ -142,6 +157,7 @@ map Q quit
 map ` mark-load
 map J half-down
 map K half-up
+map c push :z<space>
 map o open
 map g top
 map y copy
