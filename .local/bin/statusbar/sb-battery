@@ -1,9 +1,8 @@
 #!/bin/sh
 
 case $BLOCK_BUTTON in
-    1) notify-send "Battery" "$(acpi -b)";;
     2) pkill -37 dwmblocks;;
-    3) notify-send "Battery" "$(acpi -i)";;
+    3) notify-send "Battery" "$(batinfo)";;
 esac
 
 PCT=0

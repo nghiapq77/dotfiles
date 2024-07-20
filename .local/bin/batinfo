@@ -1,0 +1,30 @@
+#!/bin/sh
+# Battery information
+
+output=""
+for battery in /sys/class/power_supply/BAT*; do
+    number="$(printf "%s" "$battery" | tail -c 1)"
+    percentage="$(cat "$battery"/capacity)%"
+    status="$(cat "$battery/status")"
+    case $status in
+        "Full") icon=" " ;;
+        "Discharging") icon=" " ;;
+        "Charging") icon=" " ;;
+        "Not charging") icon=" " ;;
+        "Unknown") icon="♻️ " ;;
+    esac
+
+    energy_full="$(cat "$battery"/energy_full)"
+    energy_full_design="$(cat "$battery"/energy_full_design)"
+    time=""
+    if [ "$status" = "Charging" ] || [ "$status" = "Discharging" ]; then
+        energy_now="$(cat "$battery"/energy_now)"
+        power_now="$(cat "$battery"/power_now)"
+        [ "$status" = "Charging" ] && time="$(echo "($energy_full - $energy_now) / $power_now * 60" | bc -l | xargs printf ", %.0fm")"
+        [ "$status" = "Discharging" ] && time="$(echo "$energy_now / $power_now * 60" | bc -l | xargs printf ", %.0fm")"
+    fi
+    capacity_percent="$(echo "$energy_full / $energy_full_design * 100" | bc -l | xargs printf "%.0f%%")"
+    capacity_full="$(echo "$energy_full_design / 1000000" | bc -l | xargs printf "%.0fWh")"
+    output="${output}Battery $number: $icon $percentage $status$time\n           Capacity $capacity_percent of $capacity_full\n"
+done
+echo -e "$output"

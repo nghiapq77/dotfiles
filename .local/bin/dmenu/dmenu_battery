@@ -51,7 +51,7 @@ choice="$(echo "$cmds" | cut -d ':' -f 1 | dmenu -i -l 6 -p 'Battery action:')" 
 choice="$(echo "$cmds" | grep "^$choice" | cut -d ':' -f2)"
 case "$choice" in
     "info")
-        notify "$(acpi -i)"
+        notify "$(batinfo)"
         ;;
     "get")
         notify_battery_charge_threshold
