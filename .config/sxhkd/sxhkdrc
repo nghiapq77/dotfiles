@@ -53,7 +53,7 @@ XF86AudioMute
 XF86AudioMicMute
     playerctl play-pause
 {_,super + }XF86MonBrightness{Up,Down}
-    xbacklight -{inc 10,inc 25,dec 10,dec 25} && notify-send -u low -t 1000 -h int:value:$(xbacklight -get) "Brightness: $(xbacklight -get)%"
+    brightness -{inc 10,inc 25,dec 10,dec 25} && notify-send -u low -t 1000 -h int:value:$(brightness -get) "Brightness: $(brightness -get)%"
 XF86Display
     toggle_hdmi
 XF86WLAN

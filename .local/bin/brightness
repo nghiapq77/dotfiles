@@ -1,23 +1,56 @@
 #!/bin/sh
 
-min_value=0
-max_value=$(cat /sys/class/backlight/intel_backlight/max_brightness)
-curr_value=$(cat /sys/class/backlight/intel_backlight/brightness)
-#gap=$(awk 'BEGIN{for (i=1; i<ARGC;i++) printf "%.0f\n", ARGV[i]}' "$(echo "$max_value / 15" | bc -l)") 
-gap=$(echo $(("$max_value / 15")))
-echo $gap
-case "$1" in
-    up)
-        target_value=$(echo $curr_value + $gap | bc -l)
-        if [ "$target_value" -gt "$max_value" ]; then
-            target_value=$max_value
-        fi;;
-    down)
-        target_value=$(echo $curr_value - $gap | bc -l)
-        if [ "$target_value" -lt "$min_value" ]; then
-            target_value=$min_value
-        fi;
-esac >/dev/null
+# Control screen brightness
+# Place a file in /etc/udev/rules.d/90-backlight.rules containing:
+# SUBSYSTEM=="backlight", ACTION=="add", \
+#   RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness", \
+#   RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
 
-echo "$target_value" >/sys/class/backlight/intel_backlight/brightness
-notify-send -u low -t 1000 "Brightness: $(echo "scale=1; $target_value / $max_value * 100" | bc -l)%"
+norm(){
+    # normalize to 0-100
+    echo "($1*100)/($max_brightness)" | bc -l | xargs printf "%.0f"
+}
+
+reverse_norm(){
+    # reverse to 0-$max_brightness
+    echo "($1*$max_brightness)/100" | bc -l | xargs printf "%.0f"
+}
+
+is_integer(){
+    case "$1" in
+        (*[!0123456789]*) return 1 ;;
+        ('')              return 1 ;;
+        (*)               return 0 ;;
+    esac
+}
+
+clip(){
+    val=$1
+    [ "$val" -lt "$min_brightness" ] && val=$min_brightness
+    [ "$val" -gt "$max_brightness" ] && val=$max_brightness
+    echo "$val"
+}
+
+PREFIX="/sys/class/backlight/intel_backlight"
+min_brightness=0
+max_brightness=$(cat "$PREFIX"/max_brightness)
+current_brightness=$(cat "$PREFIX"/brightness)
+case $1 in
+    -get)
+        norm "$current_brightness"
+        ;;
+    -inc|-dec)
+        if [ "$2" != "" ] && is_integer "$2"; then
+            gap=$(reverse_norm "$2")
+            [ "$1" = "-inc" ] && sign="+" || sign="-"
+            target=$(echo "$current_brightness $sign $gap" | bc -l)
+            target=$(clip "$target")
+            echo "$target" >"$PREFIX"/brightness
+        else
+            echo "Invalid value: '$2'"
+        fi
+        ;;
+    *)
+        echo "Unknown option: '$1'"
+        ;;
+esac
