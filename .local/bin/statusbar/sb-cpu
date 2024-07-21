@@ -4,8 +4,8 @@
 # https://superuser.com/questions/1776718/getting-average-cpu-frequency
 
 case $BLOCK_BUTTON in
-    1) notify-send " CPU hogs" "$(ps axch -o cmd:15,%cpu --sort=-%cpu | head)\\n(100% per core)" ;;
     2) setsid -f "$TERMINAL" -e btop ;;
+    3) notify-send " CPU hogs" "$(ps axch -o cmd:15,%cpu --sort=-%cpu | head)\\n(100% per core)" ;;
 esac
 
 getstat() {
