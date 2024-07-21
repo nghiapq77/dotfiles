@@ -1,0 +1,2 @@
+ACTION=="add", SUBSYSTEM=="bluetooth", ENV{HOME}="/home/oz", RUN+="/home/oz/.local/bin/bluetooth_refresh"
+ACTION=="remove", SUBSYSTEM=="bluetooth", ENV{HOME}="/home/oz", RUN+="/home/oz/.local/bin/bluetooth_refresh"

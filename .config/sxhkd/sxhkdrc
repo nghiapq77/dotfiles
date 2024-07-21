@@ -61,7 +61,7 @@ XF86WLAN
 XF86Tools
     toggle_touchpad
 XF86Bluetooth
-    notify-send "Bluetooth" "$(bluetoothctl list | grep -q Controller && echo 'Off' || echo 'On')"; sleep 2.5s && pkill -43 dwmblocks
+    notify-send "Bluetooth" "$([ -f "$HOME/.cache/.bluetooth_on" ] && echo 'Turning Off' || echo 'Turning On')" && bluetooth_refresh
 XF86Launch1
     toggle_lang; pkill -39 dwmblocks
 {_,super + }XF86Favorites

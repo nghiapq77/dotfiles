@@ -7,17 +7,25 @@ esac
 
 icon=""
 status=" "
-if echo 'list' | bluetoothctl | grep -q Controller; then
-    # Bluetooth is on
+
+# Check cache
+BLUETOOTH_ON="$HOME/.cache/.bluetooth_on"
+if [ ! -f $BLUETOOTH_ON ]; then
+    echo 'list' | bluetoothctl | grep -q Controller && touch "$BLUETOOTH_ON"
+fi
+
+# Get device info if available
+if [ -f "$BLUETOOTH_ON" ]; then
     info="$(echo 'info' | bluetoothctl)"
     status="$(echo "$info" | awk '/Alias:/ {$1=""; print}')"
     if [ -z "$status" ]; then
         # No device connected
         status=" "
     else
-        # Get battery percentage if exists
+        # Get battery percentage if available
         battery="$(echo "$info" | awk '/Battery/ {printf $4}' | cut -d "(" -f2 | cut -d ")" -f1)"
         [ -n "$battery" ] && status="$status $battery%"
     fi
 fi
+
 echo "$icon$status"
