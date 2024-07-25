@@ -51,7 +51,7 @@ XF86AudioMute
 {_,super + }XF86Audio{Raise,Lower}Volume
     wpctl set-volume @DEFAULT_AUDIO_SINK@ {5%+,25%+,5%-,25%-} -l 1.5; pkill -38 dwmblocks && notify-send -u low -t 1000 -h int:value:$(get-volume percent) "Audio: $(get-volume)"
 XF86AudioMicMute
-    playerctl play-pause
+    dmenu_bluetooth
 {_,super + }XF86MonBrightness{Up,Down}
     brightness -{inc 10,inc 25,dec 10,dec 25} && notify-send -u low -t 1000 -h int:value:$(brightness -get) "Brightness: $(brightness -get)%"
 XF86Display

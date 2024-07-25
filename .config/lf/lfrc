@@ -1,14 +1,3 @@
-# Note on Image Previews
-#
-# 1. ueberzug must be installed.
-# 2. The preview file (~/.local/bin/lf/lf-previewer for me), must have a command similar to
-#    mine to generate ueberzug images.
-# 3. A `set cleaner` line as below is a cleaner script.
-# 4. lf should be started through a wrapper script (~/.local/bin/lfub for me)
-#    that creates the environment for ueberzug. This command can be be aliased
-#    in your shellrc (`alias lf="lfub") or if set to a binding, should be
-#    called directly instead of normal lf.
-
 # Basic vars
 set shellopts '-eu'
 set ifs "\n"
@@ -27,19 +16,40 @@ cmd open ${{
     case $(file --mime-type "$(readlink -f $f)" -b) in
         text/* | application/json | inode/x-empty | application/x-subrip) $EDITOR $fx;;
         image/svg+xml) display -- $f ;;
-        image/*) rotdir $f | grep -i "\.\(png\|jpg\|jpeg\|gif\|webp\|tif\|ico\)\(_large\)*$" |
-            setsid -f nsxiv -aio 2>/dev/null | while read -r file; do
-                [ -z "$file" ] && continue
-                lf -remote "send select \"$file\""
-                lf -remote "send toggle"
-            done &
-            ;;
+        image/*) lf -remote "send $id openimg" ;;
         audio/*) mpv --audio-display=no $f ;;
         video/*) setsid -f mpv $f -quiet >/dev/null 2>&1 ;;
         application/pdf) setsid -f zathura $fx >/dev/null 2>&1 ;;
         application/*zip) aunpack $fx ;;
         *) for f in $fx; do setsid -f $OPENER $f >/dev/null 2>&1; done;;
     esac
+}}
+
+cmd openimg ${{
+    isimg() {
+        grep -iE '\.(jpe?g|png|gif|svg|webp|tiff?|heif|avif|ico|bmp|jxl|raw)$'
+    }
+    listfiles() {
+        images=($(find -L "$PWD" -maxdepth 1 -type f -exec stat -c "$1 %n" {} + | isimg | sort -n | cut -d' ' -f 2-))
+    }
+    case $lf_sortby in
+        natural) images=($(find -L "$PWD" -maxdepth 1 -type f | isimg | sort -fV)) ;;
+        ext) images=($(find -L "$PWD" -maxdepth 1 -type f -exec ls -X {} + | isimg)) ;;
+        size) listfiles %s ;;
+        time) listfiles %W ;;
+        atime) listfiles %X ;;
+        ctime) listfiles %Z ;;
+    esac
+    [ $lf_reverse = "true" ] && readarray -td '' images < <(((${#images[@]})) && printf '%s\0' "${images[@]}" | tac -s '')
+    for ((i = 0; i < ${#images[@]}; i++)); do
+        [ "${images[i]}" = "$f" ] && {
+            setsid -f nsxiv -aon "$((i + 1))" "${images[@]}" | while read -r file; do
+                [ -z "$file" ] && continue
+                lf -remote "send $id toggle \"$file\""
+            done &
+            break
+        }
+    done
 }}
 
 cmd paste &{{
@@ -152,21 +162,23 @@ map <c-n> push :mkdir<space>
 map <c-r> reload
 map <enter> shell
 
+map ` mark-load
 map q
 map Q quit
-map ` mark-load
-map J half-down
-map K half-up
-map c push :z<space>
-map o open
-map g top
-map y copy
-map D delete
-map X extract
-map Z zip
+map w $tmux new-window; tmux send-keys "lfub" C-m
 map T tar
-map S $$SHELL
+map y copy
 map Y yank-basename
+map u unselect
+map o open
+map p paste
+map S $$SHELL
+map D delete
+map g top
+map J zi
+map Z zip
+map X extract
+map c clear
 map C copyto
 map M moveto
 
@@ -175,6 +187,3 @@ map A rename # at the very end
 map i push A<c-a> # at the very beginning
 map a push A<a-b><a-b><a-f> # before extension
 map B bulkrename
-
-# tmux
-map <a-w> $tmux new-window; tmux send-keys "lfub" C-m

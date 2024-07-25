@@ -28,6 +28,7 @@ done
 
 if [ -e /proc/$$/comm ]; then
 	## Terminal
+	term="$TERMINAL"
 	while [ ! "$term" ]; do
 		# loop over lines in /proc/pid/status until it reaches PPid
 		# then save that to a variable and exit the file
@@ -44,7 +45,7 @@ if [ -e /proc/$$/comm ]; then
 
 		case $name in
 			*sh|"${0##*/}") ;;  # skip shells
-			*[Ll]ogin*|*init*|*systemd*) break;;  # exit when the top is reached
+			*[Ll]ogin*|*init|*systemd*) break;;  # exit when the top is reached
 			# anything else can be assumed to be the terminal
 			# this has the side affect of catching tmux, but tmux
 			# detaches from the terminal and therefore ignoring that
@@ -93,15 +94,8 @@ if [ -e /proc/$$/comm ]; then
 	eq "$version" '*Microsoft*' && ID="fake $ID"
 
 	## Motherboard // laptop
-	read -r model < /sys/devices/virtual/dmi/id/product_name
-	# invalid model handling
-	case $model in
-		# alternate file with slightly different info
-		# on my laptop it has the device model (instead of 'hp notebook')
-		# on my desktop it has the extended motherboard model
-		'System '*|'Default '*)
-			read -r model < /sys/devices/virtual/dmi/id/board_name
-	esac
+	#read -r dev < /sys/devices/virtual/dmi/id/product_name  # specific device name
+	read -r dev < /sys/devices/virtual/dmi/id/product_family
 
 	## Packages
 	# clean environment, then make every file in the dir an argument,
@@ -114,6 +108,7 @@ if [ -e /proc/$$/comm ]; then
 		[ $# -gt 1 ] && pkgs=$# && break
 	done
 
+	## Hostname
 	read -r host < /proc/sys/kernel/hostname
 elif [ -f /var/run/dmesg.boot ]; then
 	# Both OpenBSD and FreeBSD use this file, however they're formatted differently
@@ -212,9 +207,6 @@ elif v=/System/Library/CoreServices/SystemVersion.plist; [ -f "$v" ]; then
 	done < "$v"
 fi
 
-# help i dont know if it's a capital consistently
-eq "$wm" '*[Gg][Nn][Oo][Mm][Ee]*' && wm='foot DE'
-
 ## GTK
 while read -r line; do
 	eq "$line" 'gtk-theme*' && gtk=${line##*=} && break
@@ -232,6 +224,9 @@ cpu=${cpu##*AMD }
 cpu=${cpu%% with*}
 cpu=${cpu% *-Core*}
 
+## Editor
+ed="$EDITOR"
+
 col() {
 	printf '  '
 	for i in 1 2 3 4 5 6; do
@@ -240,29 +235,32 @@ col() {
 	printf '\033[0m\n'
 }
 
+# print function
 print() {
 	[ "$2" ] && printf '\033[9%sm%6s\033[0m%b%s\n' \
 		"${accent:-4}" "$1" "${separator:- ~ }" "$2"
 }
 
 # default value
-: "${info:=n user os sh wm up gtk cpu mem host kern pkgs term col n}"
+: "${info:=n user os kern pkgs sh wm term ed dev cpu mem up col n}"
 
+# print
 for i in $info; do
 	case $i in
-		n) echo;;
-		os) print os "$ID";;
-		sh) print sh "${SHELL##*/}";;
-		wm) print wm "${wm##*/}";;
-		up) print up "$up";;
-		gtk) print gtk "${gtk# }";;
-		cpu) print cpu "$vendor$cpu";;
-		mem) print mem "$mem";;
-		host) print host "$model";;
-		kern) print kern "$kernel";;
-		pkgs) print pkgs "$pkgs";;
-		term) print term "$term";;
-		user) printf '%7s@%s\n' "$USER" "$host";;
-		col) col;;
+		n)           echo;;
+		user)        printf '%7s@%s\n' "$USER" "$host";;
+		os)          print os "$ID";;
+		kern)        print kern "$kernel";;
+		pkgs)        print pkgs "$pkgs";;
+		sh)          print sh "${SHELL##*/}";;
+		wm)          print wm "${wm##*/}";;
+		term)        print term "$term";;
+		ed)          print ed "$ed";;
+		gtk)         print gtk "${gtk# }";;
+		dev)         print dev "$dev";;
+		cpu)         print cpu "$vendor$cpu";;
+		mem)         print mem "$mem";;
+		up)          print up "$up";;
+		col)         col;;
 	esac
 done
