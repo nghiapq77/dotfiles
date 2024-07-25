@@ -47,5 +47,5 @@ TOTAL=$((ACTIVE + IDLE))
 PCT=$(( ACTIVE * 100 / TOTAL ))
 FREQ=$(grep MHz /proc/cpuinfo | awk '{print $4}' | awk '{freq+=$1;n++} END{printf("%.1f", freq/n/1000);}')
 TEMP=$(sensors | awk '/CPU:/ {print $2}' | grep -o '[0-9,.]\+' | awk '{printf("%i", $1)}')
-echo " $PCT% ${FREQ}GHz $TEMP°C"
+echo "^c#8ec07c^^d^ $PCT% ${FREQ}GHz $TEMP°C"
 echo "$ENDSTAT" > "$cache"

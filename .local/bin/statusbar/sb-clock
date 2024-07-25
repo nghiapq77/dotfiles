@@ -6,4 +6,4 @@ case $BLOCK_BUTTON in
     3) notify-send "$(cal -m "$(date --date="$(date +%Y-%m-15) +1 month" +'%B')")";;
 esac
 
-echo " $(LC_ALL=C date "+%b %d  %H:%M")"
+echo "^c#83a598^^d^ $(LC_ALL=C date "+%b %d ^c#83a598^^d^ %H:%M")"

@@ -5,12 +5,12 @@ case $BLOCK_BUTTON in
     3) dmenu_bluetooth ;;
 esac
 
-icon=""
+icon=""
 status=" "
 
 # Check cache
 BLUETOOTH_ON="$HOME/.cache/.bluetooth_on"
-if [ ! -f $BLUETOOTH_ON ]; then
+if [ ! -f "$BLUETOOTH_ON" ]; then
     echo 'list' | bluetoothctl | grep -q Controller && touch "$BLUETOOTH_ON"
 fi
 
@@ -28,4 +28,4 @@ if [ -f "$BLUETOOTH_ON" ]; then
     fi
 fi
 
-echo "$icon$status"
+echo "^c#458588^$icon^d^$status"

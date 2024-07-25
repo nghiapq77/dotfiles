@@ -7,4 +7,4 @@ case $BLOCK_BUTTON in
     4) sysact;;
     5) kill -HUP "$(pidof -s dwm)" && notify-send -t 2000 "dwm" "Restarted";;
 esac;
-echo " " 
+echo "^c#fb4934^ ^d^"

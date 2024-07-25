@@ -24,22 +24,26 @@ for battery in /sys/class/power_supply/BAT?*; do
     # Get battery capacity
     capacity=$(cat "$battery/capacity")
 
+    # Icon color
+    color="^c#98971a^"
+    [ "$status" = "Discharging" ] && color="^c#cc241d^"
+
     # Make low battery icon if discharging and low
-    [ "$capacity" -le 50 ] && [ "$status" != "Charging" ] && icon=""
-    [ "$capacity" -le 25 ] && [ "$status" != "Charging" ] && icon=""
+    [ "$capacity" -le 40 ] && [ "$status" != "Charging" ] && icon=""
+    [ "$capacity" -le 15 ] && [ "$status" != "Charging" ] && icon=""
 
     # Concatenate batteries' info
-    output="${output}$icon $capacity% "
+    output="${output}$color$icon^d^ $capacity% "
 
     # Calculate total battery percentage
-    PCT=`expr $PCT + $capacity`
+    PCT=$((PCT + capacity))
 
     # Set charging status
     [ "$status" = "Charging" ] && IS_CHARGING=1
 done
 
-# Send notify if total battery percentage < 20
-[ "$IS_CHARGING" != 1 ] && [ "$PCT" -le 20 ] && notify-send -u critical "!!! LOW BATTERY !!!"
+# Send notify if total battery percentage < 15
+[ "$IS_CHARGING" != 1 ] && [ "$PCT" -le 15 ] && notify-send -u critical "!!! LOW BATTERY !!!"
 
 # Output battery info, trim leading and trailing white spaces
 echo "$output" | awk '{$1=$1};1'

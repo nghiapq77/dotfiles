@@ -4,9 +4,7 @@ case $BLOCK_BUTTON in
     1) toggle_lang; pkill -39 dwmblocks;;
 esac
 
+icon=""
 LANG="EN"
-if [ "$(ibus engine)" = "Bamboo" ]; then
-    LANG="VN"
-fi
-
-echo " $LANG"
+[ "$(ibus engine)" = "Bamboo" ] && LANG="VN"
+echo "^c#d3869b^$icon^d^ $LANG"
