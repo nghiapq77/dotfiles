@@ -46,7 +46,7 @@ cmds="\
  Set threshold          :set
  full-charge            :full-charge
  custom-charge          :custom-charge
- toggle-force-discharge :toggle-force-discharge"
+ toggle-force-discharge :toggle-force-discharge"
 choice="$(echo "$cmds" | cut -d ':' -f 1 | dmenu -i -l 6 -p 'Battery action:')" || exit
 choice="$(echo "$cmds" | grep "^$choice" | cut -d ':' -f2)"
 case "$choice" in

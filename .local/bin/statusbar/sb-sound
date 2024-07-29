@@ -10,6 +10,6 @@ echo "$volstat" | grep -q bluetooth && vol="$(echo "$volstat" | grep 'Volume: fr
     vol="$(echo "$volstat" | grep 'Volume: front-left:' | sed "s,.* \([0-9]\+\)%.*,\1,;1q")"
 
 icon=""
-echo "$volstat" | grep "Active" | grep -q "head" && icon=""
-echo "$volstat" | grep "Mute:" | tail -n1 | grep -q "yes" && icon=""
+echo "$volstat" | grep "Active" | grep -q "head" && icon=""
+echo "$volstat" | grep "Mute:" | tail -n1 | grep -q "yes" && icon=""
 echo "^c#d65d0e^$icon^d^ $vol%"

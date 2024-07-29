@@ -11,7 +11,7 @@ stat=""
 if [ "$status" = "up" ] ; then
     stat="$(awk '/^\s*w/ { print " " int($3 * 100 / 70) "%" }' /proc/net/wireless)"
 elif [ "$status" = "down" ] ; then
-    [ "$(cat /sys/class/net/w*/flags)" = "0x1003" ] && icon="📡" || stat=" "
+    [ "$(cat /sys/class/net/w*/flags)" = "0x1003" ] && icon="" || stat=" "
 fi
 
 echo "^c#b16286^$icon^d^$stat"

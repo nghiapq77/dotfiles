@@ -3,7 +3,7 @@
 # A dmenu wrapper script for system functions.
 
 cmds="\
- display off : xset dpms force off
+󰍹 display off : xset dpms force off
  lock        : slock
  leave       : kill -TERM $(pidof -s dwm)
  refresh     : kill -HUP $(pidof -s dwm)

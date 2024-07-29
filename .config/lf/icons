@@ -4,89 +4,101 @@
 # See https://www.nerdfonts.com for more information.
 
 # file types (with matching order)
-ln             # LINK
-or      o       # ORPHAN
-tw      t       # STICKY_OTHER_WRITABLE
-ow      d       # OTHER_WRITABLE
-st      t       # STICKY
-di             # DIR
-pi      p       # FIFO
-so      s       # SOCK
-bd      b       # BLK
-cd      c       # CHR
-su      u       # SETUID
-sg      g       # SETGID
-ex             # EXEC
-fi             # FILE
+ln                      # LINK
+or                      # ORPHAN
+tw               t       # STICKY_OTHER_WRITABLE
+ow                      # OTHER_WRITABLE
+st               t       # STICKY
+di                      # DIR
+pi               p       # FIFO
+so               s       # SOCK
+bd               b       # BLK
+cd               c       # CHR
+su               u       # SETUID
+sg               g       # SETGID
+ex                      # EXEC
+fi                      # FILE
 
-# file extensions (vim-devicons)
-*.html           
-*.md             
-*.markdown      
-*.json          
-*.py            
-*.h             
-*.hh            
-*.hpp           
-*.hxx           
-*.cpp           
-*.c++           
-*.cxx           
-*.cc            
-*.c             
-*.sh            
-*.git*          
-*.diff          
-*.vim           
-*.conf          
-*.ini           
+# file extensions
+# devicons
+*.conf           
+*.ini            
+*.html            
+*.md             
+*.markdown       
+*.json           
+*.py             
+*.h              
+*.hh             
+*.hpp            
+*.hxx            
+*.cpp            
+*.c++            
+*.cxx            
+*.cc             
+*.c              
+*.git*           
+*.diff           
+*.vim            
+*.sh             
 
-# file names (vim-devicons) (case-insensitive not supported in lf)
-*bashrc                 
-*profile                
-*dockerfile             
-*docker-compose.yml     
-*Makefile               
-*CMakeLists.txt         
+# archives or compressed
+*.tar            
+*.tgz            
+*.t7z            
+*.zip            
+*.z              
+*.gz             
+*.xz             
+*.zst            
+*.tzst           
+*.bz2            
+*.bz             
+*.tbz            
+*.tbz2           
+*.deb            
+*.rpm            
+*.rar            
+*.7z             
 
-# archives or compressed (extensions from dircolors defaults)
-*.tar   
-*.tgz   
-*.t7z   
-*.zip   
-*.z     
-*.gz    
-*.xz    
-*.zst   
-*.tzst  
-*.bz2   
-*.bz    
-*.tbz   
-*.tbz2  
-*.deb   
-*.rpm   
-*.rar   
-*.cpio  
-*.7z    
+# image          
+*.jpg            
+*.jpeg           
+*.mjpg           
+*.mjpeg          
+*.gif            
+*.png            
 
-# image
-*.jpg   
-*.jpeg  
-*.mjpg  
-*.mjpeg 
-*.gif   
-*.png   
+# video          
+*.avi            
+*.mkv            
+*.mp4            
 
-# video
-*.avi   
-*.mkv   
-*.mp4   
+# audio          
+*.aac            
+*.m4a            
+*.mp3            
+*.wav            
 
-# audio
-*.aac   
-*.m4a   
-*.mp3   
-*.wav   
+# other
+*.pdf            
 
-# other formats
-*.pdf   
+# folder names
+downloads/       
+docs/            󰈙
+pics/            
+music/           󰲹
+.config/         
+projects/        
+dotfiles/        
+src/             
+.local/          
+bin/             
+.librewolf/      
+.gnupg/          
+
+# file names
+*dockerfile      
+*Dockerfile      
+*Makefile        
+*CMakeLists.txt  

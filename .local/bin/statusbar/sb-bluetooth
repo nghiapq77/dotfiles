@@ -8,11 +8,11 @@ esac
 icon=""
 status=" "
 
-# Check cache
 BLUETOOTH_ON="$HOME/.cache/.bluetooth_on"
-if [ ! -f "$BLUETOOTH_ON" ]; then
-    echo 'list' | bluetoothctl | grep -q Controller && touch "$BLUETOOTH_ON"
-fi
+#if [ ! -f "$BLUETOOTH_ON" ]; then
+    #echo 'list' | bluetoothctl | grep -q Controller && touch "$BLUETOOTH_ON"
+#fi
+# Handled by udev rule
 
 # Get device info if available
 if [ -f "$BLUETOOTH_ON" ]; then

@@ -7,11 +7,11 @@ for battery in /sys/class/power_supply/BAT*; do
     percentage="$(cat "$battery"/capacity)%"
     status="$(cat "$battery/status")"
     case $status in
-        "Full") icon=" " ;;
-        "Discharging") icon=" " ;;
-        "Charging") icon=" " ;;
-        "Not charging") icon=" " ;;
-        "Unknown") icon="♻️ " ;;
+        "Full") icon="" ;;
+        "Discharging") icon="" ;;
+        "Charging") icon="" ;;
+        "Not charging") icon="" ;;
+        "Unknown") icon="♻️" ;;
     esac
 
     energy_full="$(cat "$battery"/energy_full)"
