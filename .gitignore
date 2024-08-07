@@ -1,4 +1,4 @@
 *.ttf
 *.otf
-.config/nvim/coc-settings.json
+*.json
 wallpaper.png

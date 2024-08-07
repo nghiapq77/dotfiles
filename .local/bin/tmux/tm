@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Attach if exists
+session="oz"
+if $(tmux has-session -t $session 2>/dev/null); then tmux attach -t $session; exit; fi
+
+# Create new window
+tmux new-session -d -n bash -s $session -c /home/oz
+
+# Attaching
+tmux attach -t $session
