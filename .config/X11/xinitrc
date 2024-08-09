@@ -7,9 +7,9 @@
 AUTOSTART="\
 dwmblocks
 remaps
-sxhkd
 ibus-daemon -drx
 picom
+dunst
 unclutter
 xwallpaper --zoom $HOME/.local/dotfiles/wallpaper.png
 "
@@ -23,8 +23,5 @@ for command in $AUTOSTART; do
     pidof -sx "$program" || eval "$command &"
 done >/dev/null 2>&1
 
-# Activate dbus variables
-dbus-update-activation-environment --all
-
 # Run dwm
-exec dbus-launch --exit-with-session dwm
+exec dwm
