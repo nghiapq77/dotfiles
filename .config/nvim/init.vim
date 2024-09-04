@@ -186,11 +186,11 @@ nnoremap <C-f> :Rg<CR>
 nnoremap <Leader>v :vsplit<CR>:Files<CR>
 
 """treesitter
+let g:c_syntax_for_h = 1
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
   highlight = {
     enable = true,
-    disable = { "cpp" },
     additional_vim_regex_highlighting = false,
   },
 }
@@ -199,6 +199,8 @@ EOF
 """ buffer
 nnoremap <leader>j :bnext<CR>
 nnoremap <leader>k :bprevious<CR>
+nnoremap <leader>n :bnext<CR>
+nnoremap <leader>p :bprevious<CR>
 nnoremap <leader><tab> <C-^>
 
 " bufferline

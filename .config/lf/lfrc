@@ -25,6 +25,10 @@ cmd open ${{
     esac
 }}
 
+cmd downdir &{{
+    [ -d "$f" ] && lf -remote "send $id open"
+}}
+
 cmd openimg ${{
     isimg() {
         grep -iE '\.(jpe?g|png|gif|svg|webp|tiff?|heif|avif|ico|bmp|jxl|raw)$'
@@ -156,11 +160,6 @@ cmd on-cd &{{
 }}
 
 # Key bindings
-map <c-f> zi
-map <c-n> push :mkdir<space>
-map <c-r> reload
-map <enter> shell
-
 map ` mark-load
 map q
 map Q quit
@@ -175,11 +174,16 @@ map S $$SHELL
 map D delete
 map g top
 map J zi
+map l downdir
+map <enter> shell
 map Z zip
 map X extract
 map c clear
 map C copyto
 map M moveto
+map <c-f> zi
+map <c-n> push $mkdir<space>
+map <c-r> reload
 
 # rename
 map A rename # at the very end

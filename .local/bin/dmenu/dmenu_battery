@@ -58,8 +58,8 @@ case "$choice" in
         ;;
     "set")
         ask_battery
-        start="$(dmenu -p 'Start threshold:')" || exit
-        end="$(dmenu -p 'End threshold:')" || exit
+        start="$(dmenu -p 'Start threshold:' </dev/null)" || exit
+        end="$(dmenu -p 'End threshold:' </dev/null)" || exit
         # Input checking
         is_integer "$end" && is_integer "$start" && 
         [ "$end" -ge 0 ] && [ "$start" -ge 0 ] && [ "$end" -le 100 ] && [ "$start" -le 100 ] && [ "$start" -lt "$end" ] && (

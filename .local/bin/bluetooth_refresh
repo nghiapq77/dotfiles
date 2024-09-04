@@ -2,6 +2,6 @@
 
 sleep 3s
 BLUETOOTH_ON="$HOME/.cache/.bluetooth_on"
-echo 'list' | bluetoothctl | grep -q Controller && touch "$BLUETOOTH_ON" || rm "$BLUETOOTH_ON" 2>/dev/null
+echo 'list' | bluetoothctl | grep -q Controller && touch "$BLUETOOTH_ON" || rm -f "$BLUETOOTH_ON" 2>/dev/null
 pkill -43 dwmblocks # Refresh dwmblocks bluetooth module
 pkill -38 dwmblocks # Refresh dwmblocks sound module

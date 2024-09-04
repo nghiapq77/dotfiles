@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Checks if a device is connected
+device_connected() {
+    if bluetoothctl info "$1" | grep -F -q "Connected: yes"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Toggles device connection
+toggle_connection() {
+    if device_connected "$1"; then
+        notify-send "Bluetooth" "Trying to disconnect from $2"
+        bluetoothctl disconnect "$1" && notify-send "Bluetooth" "Disconnected from $2" || notify-send "Bluetooth" "Failed to disconnect from $2"
+    else
+        notify-send "Bluetooth" "Trying to connect to $2"
+        bluetoothctl connect "$1" && notify-send "Bluetooth" "Connected to $2" || notify-send "Bluetooth" "Failed to connect to $2"
+    fi
+}
+
+# Get first device and toggle connection
+device="$(bluetoothctl devices | grep -F Device | head -n 1)"
+device_name="$(echo "$device" | cut -d ' ' -f 3-)"
+mac="$(echo "$device" | cut -d ' ' -f 2)"
+toggle_connection "$mac" "$device_name"

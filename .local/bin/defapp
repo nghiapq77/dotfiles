@@ -1,0 +1,14 @@
+#!/bin/sh
+
+tmuxcreate(){
+    if $(tmux has-session -t "$1" 2>/dev/null); then
+        tmux ls | grep "$1" | grep -q attached
+        [ $? != 0 ] && setsid -f "$TERMINAL" -n "$2" -e tmux attach -t "$1"
+    else
+        setsid -f "$TERMINAL" -n "$2" -e "$3"
+    fi
+}
+
+pidof "$BROWSER" >/dev/null || setsid -f "$BROWSER"
+tmuxcreate "oz" "tm" "tm"
+tmuxcreate "lf" "lf" "lftm"
