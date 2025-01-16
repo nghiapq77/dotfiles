@@ -1,7 +1,12 @@
 #!/bin/sh
 # Requires libnotify and password patch for dmenu
 
-notify-send -t 2000 "Wifi" "Loading wifi list..."
+# Notify function
+notify() {
+    notify-send -h string:x-dunst-stack-tag:wifi "Wifi" "$1"
+}
+
+notify "Loading wifi list..."
 
 # Choose wifi via dmenu
 wifi=$(nmcli device wifi list | tail -n +2 | dmenu -i -l 15 -p "Select wifi:")
@@ -9,7 +14,7 @@ wifi=$(nmcli device wifi list | tail -n +2 | dmenu -i -l 15 -p "Select wifi:")
 # Get bssid and check
 wifi_bssid=$(echo "$wifi" | awk '{printf $1}')
 [ -z "$wifi_bssid" ] && exit
-[ "$wifi_bssid" = "*" ] && notify-send "Wifi" "Connected already" && exit
+[ "$wifi_bssid" = "*" ] && notify "Connected already" && exit
 
 # Using saved password if possible, otherwise input password
 wifi_name=$(echo "$wifi" | awk '{printf $2}')
@@ -17,9 +22,9 @@ if [ -z "$(nmcli connection show | grep -w "$wifi_name")" ]; then
     password=$(echo "$1" | dmenu -P -p "Enter password:")
     result=$(nmcli device wifi connect "$wifi_bssid" password "$password")
 else
-    notify-send "Trying to connect to wifi using saved password..."
+    notify "Trying to connect to wifi using saved password..."
     result=$(nmcli device wifi connect "$wifi_bssid")
 fi
 
 # If connection fails, forget wifi password
-echo "$result" | grep -i "successfully" && notify-send "Wifi" "Connect to wifi successfully" || (notify-send "Wifi" "Connection failed" && nmcli connection delete "$wifi_name")
+echo "$result" | grep -i "successfully" && notify "Connect to wifi successfully" || (notify "Connection failed" && nmcli connection delete "$wifi_name")

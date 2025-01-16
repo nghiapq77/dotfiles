@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Notify function
+notify() {
+    notify-send -h string:x-dunst-stack-tag:bluetooth "Bluetooth" "$1"
+}
+
 # Checks if a device is connected
 device_connected() {
     if bluetoothctl info "$1" | grep -F -q "Connected: yes"; then
@@ -9,14 +14,29 @@ device_connected() {
     fi
 }
 
+# Checks if a device is blocked
+device_blocked() {
+    if bluetoothctl info "$1" | grep -F -q "Blocked: yes"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Toggles device connection
 toggle_connection() {
     if device_connected "$1"; then
-        notify-send "Bluetooth" "Trying to disconnect from $2"
-        bluetoothctl disconnect "$1" && notify-send "Bluetooth" "Disconnected from $2" || notify-send "Bluetooth" "Failed to disconnect from $2"
+        notify "Trying to disconnect from $2"
+        bluetoothctl disconnect "$1" && notify "Disconnected from $2" || notify "Failed to disconnect from $2"
+        if ! device_blocked "$1"; then
+            bluetoothctl block "$1" && notify "Blocked $2" || notify "Failed to block $2"
+        fi
     else
-        notify-send "Bluetooth" "Trying to connect to $2"
-        bluetoothctl connect "$1" && notify-send "Bluetooth" "Connected to $2" || notify-send "Bluetooth" "Failed to connect to $2"
+        if device_blocked "$1"; then
+            bluetoothctl unblock "$1" && notify "Unblocked $2" || notify "Failed to unblock $2"
+        fi
+        notify "Trying to connect to $2"
+        bluetoothctl connect "$1" && notify "Connected to $2" || notify "Failed to connect to $2"
     fi
 }
 

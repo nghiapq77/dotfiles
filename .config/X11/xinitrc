@@ -7,7 +7,7 @@
 AUTOSTART="\
 dwmblocks
 remaps
-ibus-daemon -drx
+ibus-daemon -drxs
 picom
 dunst
 unclutter

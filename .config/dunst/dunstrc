@@ -5,9 +5,9 @@
 
     ### Geometry ###
     width = (0, 600)
-    height = 400
+    height = (0, 400)
     origin = top-right
-    offset = 3x30
+    offset = (3, 30)
     scale = 0
     notification_limit = 10
     progress_bar = true

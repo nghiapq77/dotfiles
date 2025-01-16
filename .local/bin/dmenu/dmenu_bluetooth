@@ -6,6 +6,11 @@ divider="|"
 exit="Exit"
 connected_icon=""
 
+# Notify function
+notify() {
+    notify-send -h string:x-dunst-stack-tag:bluetooth "Bluetooth" "$1"
+}
+
 # Checks if bluetooth controller is powered on
 power_on() {
     if bluetoothctl show | grep -F -q "Powered: yes"; then
@@ -110,11 +115,11 @@ device_connected() {
 # Toggles device connection
 toggle_connection() {
     if device_connected "$1"; then
-        notify-send "Bluetooth" "Trying to disconnect from $2"
-        bluetoothctl disconnect "$1" && notify-send "Bluetooth" "Disconnected from $2" || notify-send "Bluetooth" "Failed to disconnect from $2"
+        notify "Trying to disconnect from $2"
+        bluetoothctl disconnect "$1" && notify "Disconnected from $2" || notify "Failed to disconnect from $2"
     else
-        notify-send "Bluetooth" "Trying to connect to $2"
-        bluetoothctl connect "$1" && notify-send "Bluetooth" "Connected to $2" || notify-send "Bluetooth" "Failed to connect to $2"
+        notify "Trying to connect to $2"
+        bluetoothctl connect "$1" && notify "Connected to $2" || notify "Failed to connect to $2"
     fi
 }
 
