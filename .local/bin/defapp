@@ -10,5 +10,6 @@ tmuxcreate(){
 }
 
 pidof "$BROWSER" >/dev/null || setsid -f "$BROWSER"
+pidof brave >/dev/null || setsid -f brave --force-device-scale-factor=1.25
 tmuxcreate "oz" "tm" "tm"
 tmuxcreate "lf" "lf" "lftm"

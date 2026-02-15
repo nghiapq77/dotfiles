@@ -74,8 +74,10 @@ case "$choice" in
         notify_battery_charge_threshold
         ;;
     "custom-charge")
-        echo 80 | sudo tee $BATTERY_PREFIX/BAT*/charge_control_start_threshold >/dev/null
-        echo 81 | sudo tee $BATTERY_PREFIX/BAT*/charge_control_end_threshold >/dev/null
+        echo 79 | sudo tee $BATTERY_PREFIX/BAT0/charge_control_start_threshold >/dev/null
+        echo 80 | sudo tee $BATTERY_PREFIX/BAT0/charge_control_end_threshold >/dev/null
+        echo 0 | sudo tee $BATTERY_PREFIX/BAT1/charge_control_start_threshold >/dev/null
+        echo 100 | sudo tee $BATTERY_PREFIX/BAT1/charge_control_end_threshold >/dev/null
         notify_battery_charge_threshold
         ;;
     "toggle-force-discharge")
