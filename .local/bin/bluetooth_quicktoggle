@@ -1,47 +1,117 @@
 #!/bin/sh
 
-# Notify function
+# Helpers
+bt() {
+  # Run bluetoothctl interactively and capture output (stdout+stderr)
+  printf '%s\nquit\n' "$1" | bluetoothctl 2>&1
+}
+
 notify() {
-    notify-send -h string:x-dunst-stack-tag:bluetooth "Bluetooth" "$1"
+  notify-send -h string:x-dunst-stack-tag:bluetooth "Bluetooth" "$1"
 }
 
-# Checks if a device is connected
 device_connected() {
-    if bluetoothctl info "$1" | grep -F -q "Connected: yes"; then
-        return 0
-    else
-        return 1
-    fi
+  if bt "info $1" | grep -F -q "Connected: yes"; then
+    return 0
+  else
+    return 1
+  fi
 }
 
-# Checks if a device is blocked
-device_blocked() {
-    if bluetoothctl info "$1" | grep -F -q "Blocked: yes"; then
-        return 0
-    else
-        return 1
+#device_blocked() {
+  #if bt "info $1" | grep -F -q "Blocked: yes"; then
+    #return 0
+  #else
+    #return 1
+  #fi
+#}
+
+wait_connected() {
+  mac="$1"
+  timeout_s="${2:-6}"
+
+  i=0
+  while [ "$i" -lt "$timeout_s" ]; do
+    if bt "info $mac" | grep -Fq "Connected: yes"; then
+      return 0
     fi
+    sleep 1
+    i=$((i+1))
+  done
+  return 1
+}
+
+wait_disconnected() {
+  mac="$1"
+  timeout_s="${2:-6}"
+
+  i=0
+  while [ "$i" -lt "$timeout_s" ]; do
+    if bt "info $mac" | grep -Fq "Connected: no"; then
+      return 0
+    fi
+    # Some BlueZ versions omit "Connected: no" when device object isn't loaded;
+    # fallback: if "Connected: yes" is absent, treat as disconnected.
+    if ! bt "info $mac" | grep -Fq "Connected: yes"; then
+      return 0
+    fi
+    sleep 1
+    i=$((i+1))
+  done
+  return 1
+}
+
+connect_device() {
+  mac="$1"
+  out="$(bt "connect $mac")"
+
+  # Fast-fail on known error strings
+  echo "$out" | grep -Eqi "Failed to connect|org\.bluez\.Error|not available|does not exist" && return 1
+
+  wait_connected "$mac" 5
+}
+
+disconnect_device() {
+  mac="$1"
+  out="$(bt "disconnect $mac")"
+
+  echo "$out" | grep -Eqi "Failed to disconnect|org\.bluez\.Error" && return 1
+
+  wait_disconnected "$mac" 5
 }
 
 # Toggles device connection
 toggle_connection() {
-    if device_connected "$1"; then
-        notify "Trying to disconnect from $2"
-        bluetoothctl disconnect "$1" && notify "Disconnected from $2" || notify "Failed to disconnect from $2"
-        if ! device_blocked "$1"; then
-            bluetoothctl block "$1" && notify "Blocked $2" || notify "Failed to block $2"
-        fi
+  if device_connected "$1"; then
+    notify "Disconnecting from $2"
+    if disconnect_device "$1"; then
+      notify "Disconnected from $2"
     else
-        if device_blocked "$1"; then
-            bluetoothctl unblock "$1" && notify "Unblocked $2" || notify "Failed to unblock $2"
-        fi
-        notify "Trying to connect to $2"
-        bluetoothctl connect "$1" && notify "Connected to $2" || notify "Failed to connect to $2"
+      notify "Failed to disconnect $2"
+      return 1
     fi
+
+    #if ! device_blocked "$1"; then
+      #bt "block $1" >/dev/null && notify "Blocked $2" || notify "Failed to block $2"
+    #fi
+  else
+    #if device_blocked "$1"; then
+      #bt "unblock $1" >/dev/null && notify "Unblocked $2" || notify "Failed to unblock $2"
+    #fi
+
+    notify "Connecting to $2"
+    if connect_device "$1"; then
+      notify "Connected to $2"
+    else
+      notify "Failed to connect $2"
+      return 1
+    fi
+  fi
 }
 
 # Get first device and toggle connection
-device="$(bluetoothctl devices | grep -F Device | head -n 1)"
+device="$(bt "devices" | grep -F Device | head -n 1)"
 device_name="$(echo "$device" | cut -d ' ' -f 3-)"
 mac="$(echo "$device" | cut -d ' ' -f 2)"
 toggle_connection "$mac" "$device_name"
+bluetooth_refresh

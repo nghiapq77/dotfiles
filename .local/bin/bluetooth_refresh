@@ -1,7 +1,46 @@
 #!/bin/sh
 
-sleep 3s
-BLUETOOTH_ON="$HOME/.cache/.bluetooth_on"
-echo 'list' | bluetoothctl | grep -q Controller && touch "$BLUETOOTH_ON" || rm -f "$BLUETOOTH_ON" 2>/dev/null
-pkill -43 dwmblocks # Refresh dwmblocks bluetooth module
-pkill -38 dwmblocks # Refresh dwmblocks sound module
+BLUETOOTH_ON="${HOME:-/home/oz}/.cache/.bluetooth_on"
+MAX_RETRIES=3
+SLEEP_SECONDS=2
+
+set_on() {
+    touch "$BLUETOOTH_ON"
+}
+
+set_off() {
+    rm -f "$BLUETOOTH_ON"
+}
+
+refresh_blocks() {
+    pkill -43 -x dwmblocks 2>/dev/null || true  # bluetooth module
+    pkill -38 -x dwmblocks 2>/dev/null || true  # sound module
+}
+
+bluetooth_ready() {
+    systemctl is-active --quiet bluetooth || return 1
+    echo 'list' | bluetoothctl 2>/dev/null | grep -q '^Controller '
+}
+
+# Udev remove events should update state immediately.
+if [ "${ACTION:-}" = "remove" ]; then
+    set_off
+    refresh_blocks
+    exit 0
+fi
+
+# On boot, bluetoothd/controller may come up after this script is called.
+i=0
+while [ "$i" -lt "$MAX_RETRIES" ]; do
+    if bluetooth_ready; then
+        set_on
+        refresh_blocks
+        exit 0
+    else
+        set_off
+        refresh_blocks
+    fi
+
+    i=$((i + 1))
+    sleep "$SLEEP_SECONDS"
+done
