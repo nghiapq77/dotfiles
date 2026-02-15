@@ -159,6 +159,20 @@ cmd on-cd &{{
     zoxide add "$PWD"
 }}
 
+# fzf
+cmd fzf_jump ${{
+    res="$(find . | fzf --reverse --header="Jump to location" || true)"
+    if [ -n "$res" ]; then
+        if [ -d "$res" ]; then
+            cmd="cd"
+        else
+            cmd="select"
+        fi
+        res="$(printf '%s' "$res" | sed 's/\\/\\\\/g;s/"/\\"/g')"
+        lf -remote "send $id $cmd \"$res\""
+    fi
+}}
+
 # Key bindings
 map ` mark-load
 map q
@@ -179,10 +193,11 @@ map <enter> shell
 map Z zip
 map X extract
 map c clear
-map C copyto
-map M moveto
-map <c-f> zi
+#map C copyto
+#map M moveto
+map <c-f> :fzf_jump
 map <c-n> push $mkdir<space>
+map r reload
 map <c-r> reload
 
 # rename

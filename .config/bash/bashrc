@@ -12,7 +12,8 @@ unset HISTFILESIZE
 HISTSIZE=100000
 export HISTCONTROL=ignoredups                # ignore duplicates
 shopt -s histappend                          # enable history appending instead of overwriting when exiting
-PROMPT_COMMAND="history -a;$PROMPT_COMMAND"  # write command to history immediately
+#PROMPT_COMMAND="history -a;$PROMPT_COMMAND"  # write command to history immediately
+PROMPT_COMMAND="history -a; history -n${PROMPT_COMMAND:+;$PROMPT_COMMAND}"  # write command to history immediately
 
 ### Setting PS1
 export PS1="\[\e]0;\u: \w\a\]\[\033[01;31m\][\[\033[01;32m\]\u \[\033[01;34m\]\w\[\033[01;31m\]]\[\033[00m\]\$ "
