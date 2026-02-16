@@ -22,13 +22,6 @@ bluetooth_ready() {
     echo 'list' | bluetoothctl 2>/dev/null | grep -q '^Controller '
 }
 
-# Udev remove events should update state immediately.
-if [ "${ACTION:-}" = "remove" ]; then
-    set_off
-    refresh_blocks
-    exit 0
-fi
-
 # On boot, bluetoothd/controller may come up after this script is called.
 i=0
 while [ "$i" -lt "$MAX_RETRIES" ]; do
@@ -36,11 +29,11 @@ while [ "$i" -lt "$MAX_RETRIES" ]; do
         set_on
         refresh_blocks
         exit 0
-    else
-        set_off
-        refresh_blocks
     fi
 
     i=$((i + 1))
     sleep "$SLEEP_SECONDS"
 done
+
+set_off
+refresh_blocks

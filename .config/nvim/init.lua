@@ -15,9 +15,9 @@ call plug#begin(stdpath('data') . '/plugged')
     Plug 'nvim-tree/nvim-web-devicons'
     Plug 'akinsho/bufferline.nvim', { 'tag': '*' }
     Plug 'windwp/nvim-autopairs'
-    " LSP + Completion
     Plug 'neovim/nvim-lspconfig'
     Plug 'williamboman/mason.nvim'
+    Plug 'williamboman/mason-lspconfig'
     Plug 'hrsh7th/nvim-cmp'
     Plug 'hrsh7th/cmp-nvim-lsp'
     Plug 'hrsh7th/cmp-buffer'
@@ -96,9 +96,6 @@ end, {})
 
 -- Y like C/D behavior
 map("n", "Y", "y$", silent)
-
--- Remap E to ge
---map("n", "E", "ge", silent)
 
 -- Disable Ex mode
 map("n", "Q", "<Nop>", silent)
@@ -179,13 +176,6 @@ require("nvim-treesitter").setup({
   },
 })
 
-------------------------------------------------------------
--- Folding (treesitter)
-------------------------------------------------------------
---vim.opt.foldmethod = "expr"
---vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
---vim.opt.foldenable = false
-
 -- bufferline
 require("bufferline").setup({
   options = {
@@ -201,89 +191,26 @@ require("bufferline").setup({
 })
 
 ------------------------------------------------------------
--- Mason + nvim lspconfig
+-- Mason
 ------------------------------------------------------------
+-- Add the same capabilities to ALL server configurations.
+vim.lsp.config("*", {
+  capabilities = vim.lsp.protocol.make_client_capabilities()
+})
+
 require("mason").setup()
-
--- Helper: conda python resolver
-local function conda_python()
-  local p = vim.env.CONDA_PREFIX
-  if p and p ~= "" then
-    return p .. "/bin/python"
-  end
-  -- fallback
-  local py = vim.fn.exepath("python3")
-  if py ~= "" then return py end
-  return vim.fn.exepath("python")
-end
-
--- Helper: Keymaps on attach
-local function lsp_on_attach(_, bufnr)
-  local function bmap(mode, lhs, rhs, desc)
-    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, noremap = true, desc = desc })
-  end
-
-  bmap("n", "gd", vim.lsp.buf.definition, "LSP: Goto Definition")
-  bmap("n", "gD", vim.lsp.buf.declaration, "LSP: Goto Declaration")
-  bmap("n", "gi", vim.lsp.buf.implementation, "LSP: Implementation")
-  bmap("n", "gr", vim.lsp.buf.references, "LSP: References")
-  --bmap("n", "K", vim.lsp.buf.hover, "LSP: Hover")
-
-  bmap("n", "<leader>rn", vim.lsp.buf.rename, "LSP: Rename")
-  bmap("n", "<leader>ca", vim.lsp.buf.code_action, "LSP: Code Action")
-
-  --bmap("n", "[d", vim.diagnostic.goto_prev, "Diag: Prev")
-  --bmap("n", "]d", vim.diagnostic.goto_next, "Diag: Next")
-  bmap("n", "<leader>e", vim.diagnostic.open_float, "Diag: Float")
-  bmap("n", "<leader>q", vim.diagnostic.setloclist, "Diag: Loclist")
-
-  --bmap("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, "LSP: Format")
-end
-
--- Server definitions
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-local servers = {
-  pyright = {
-    filetypes = { "python" },
-    settings = {
-      python = {
-        pythonPath = conda_python(),
-        analysis = {
-          autoSearchPaths = true,
-          diagnosticMode = "openFilesOnly",
-          useLibraryCodeForTypes = true,
-        },
-      },
-    },
-  },
-
-  lua_ls = {
-    filetypes = { "lua" },
-    settings = {
-      Lua = {
-        diagnostics = { globals = { "vim" } },
-        workspace = {
-          checkThirdParty = false,
-          library = vim.api.nvim_get_runtime_file("", true),
-        },
-        telemetry = { enable = false },
-      },
-    },
-  },
+require("mason-lspconfig").setup {
+  ensure_installed = { "pyright", "lua_ls", "bashls" }
 }
 
--- Register all servers
-for name, config in pairs(servers) do
-  vim.lsp.config(name, {
-    on_attach = lsp_on_attach,
-    capabilities = capabilities,
-    filetypes = config.filetypes,
-    settings = config.settings,
-  })
-end
-
--- Enable them
-vim.lsp.enable(vim.tbl_keys(servers))
+-- Keymaps
+map({ "n", "x" }, "gd", "<Cmd>lua vim.lsp.buf.definition()<cr>", silent)
+map({ "n", "x" }, "gD", "<Cmd>lua vim.lsp.buf.declaration()<cr>", silent)
+map({ "n", "x" }, "gi", "<Cmd>lua vim.lsp.buf.implementation()<cr>", silent)
+map({ "n", "x" }, "gr", "<Cmd>lua vim.lsp.buf.references()<cr>", silent)
+map({ "n", "x" }, "<leader>rn", "<Cmd>lua vim.lsp.buf.rename()<cr>", silent)
+map({ "n", "x" }, "<leader>ca", "<Cmd>lua vim.lsp.buf.code_action()<cr>", silent)
+map({ "n", "x" }, "<leader>F", "<Cmd>lua vim.lsp.buf.format({ async = true })<cr>", silent)
 
 -- Diagnostic
 vim.o.updatetime = 250  -- faster hover trigger

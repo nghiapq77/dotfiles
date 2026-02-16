@@ -18,14 +18,6 @@ device_connected() {
   fi
 }
 
-#device_blocked() {
-  #if bt "info $1" | grep -F -q "Blocked: yes"; then
-    #return 0
-  #else
-    #return 1
-  #fi
-#}
-
 wait_connected() {
   mac="$1"
   timeout_s="${2:-6}"
@@ -90,15 +82,7 @@ toggle_connection() {
       notify "Failed to disconnect $2"
       return 1
     fi
-
-    #if ! device_blocked "$1"; then
-      #bt "block $1" >/dev/null && notify "Blocked $2" || notify "Failed to block $2"
-    #fi
   else
-    #if device_blocked "$1"; then
-      #bt "unblock $1" >/dev/null && notify "Unblocked $2" || notify "Failed to unblock $2"
-    #fi
-
     notify "Connecting to $2"
     if connect_device "$1"; then
       notify "Connected to $2"
